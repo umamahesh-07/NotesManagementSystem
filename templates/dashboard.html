@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="slide-down mb-4">📊 Dashboard</h2>
+
+<div class="row">
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow fade-in">
+            <h4>Total Notes</h4>
+            <h2 class="text-primary">{{ total }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow fade-in">
+            <h4>Total Words</h4>
+            <h2 class="text-success">{{ total_words }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 shadow fade-in">
+            <h4>Last Updated</h4>
+            {% if last %}
+            <p><b>{{ last.title }}</b><br>{{ last.created_at }}</p>
+            {% else %}
+            <p>No notes yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<h3 class="mt-5 slide-left">Recent Notes</h3>
+
+{% if recent %}
+<ul class="list-group mt-3">
+    {% for note in recent %}
+    <li class="list-group-item d-flex justify-content-between">
+        <span>{{ note.title }}</span>
+        <small>{{ note.created_at }}</small>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No recent notes</p>
+{% endif %}
+
+{% endblock %}

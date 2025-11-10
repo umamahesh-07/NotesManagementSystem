@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="slide-right mb-3">Edit Note</h2>
+
+<div class="card shadow p-4 fade-in">
+    <form method="POST">
+
+        <div class="mb-3">
+            <label>Title</label>
+            <input name="title" class="form-control" value="{{ note.title }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Content</label>
+            <textarea name="content" rows="5" class="form-control" required>{{ note.content }}</textarea>
+        </div>
+
+        <button class="btn btn-success glow-btn">Update</button>
+
+    </form>
+</div>
+
+{% endblock %}

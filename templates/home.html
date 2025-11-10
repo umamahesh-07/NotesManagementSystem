@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="text-center py-5 fade-in">
+    <img src="{{ url_for('static', filename='images/home_hero.png') }}" 
+         alt="Notes App Hero" 
+         class="img-fluid mb-4" 
+         style="max-width: 500px; animation: fadeIn 1s ease;">
+</div>
+
+<h1 class="display-5 fw-bold slide-down text-center">
+    Welcome to NotesApp
+</h1>
+
+<p class="lead text-center">
+    Organize your notes easily in one place.
+</p>
+
+<div class="text-center mt-4">
+    {% if 'user_id' in session %}
+        <a href="/viewall" class="btn btn-primary btn-lg glow-btn">Go to My Notes</a>
+    {% else %}
+        <a href="/register" class="btn btn-success btn-lg glow-btn me-2">Create Account</a>
+        <a href="/login" class="btn btn-outline-light btn-lg glow-btn">Login</a>
+    {% endif %}
+</div>
+
+{% endblock %}

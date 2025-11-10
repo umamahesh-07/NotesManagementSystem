@@ -1,0 +1,26 @@
+﻿# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+# Environments
+venv/
+env/
+.venv/
+.vevn/  # in case your folder is named like this
+ENV/
+# IDE/editor
+.vscode/
+.idea/
+# OS files
+.DS_Store
+Thumbs.db
+# Builds
+dist/
+build/
+# Logs
+*.log
+# Secrets / local settings
+*.env
+.env
+# Flask instance folder
+instance/
