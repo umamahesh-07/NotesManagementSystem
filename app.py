@@ -1,11 +1,22 @@
 from flask import Flask, render_template, request, redirect, session, flash, url_for
 import mysql.connector
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
 from datetime import timedelta
 
 app = Flask(__name__)
 app.secret_key = "myverysecretkey"
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'umamaheshadepu75@gmail.com'
+app.config['MAIL_PASSWORD'] = 'qllb hhqc ldtw rqxm'  
+
+mail = Mail(app)
+
 
 
 app.permanent_session_lifetime = timedelta(days=7)
@@ -115,46 +126,50 @@ def logout():
     session.clear()
     flash("Logged out successfully.", "info")
     return redirect('/login')
+@app.route('/forgot_password')
+def forgot_password():
+    return render_template("forgot_password.html")
 
 
+@app.route('/send_reset_link', methods=['POST'])
+def send_reset_link():
+    email = request.form['email']
 
-@app.route('/forgot', methods=['GET', 'POST'])
-def forgot():
-    if request.method == 'POST':
-        email = request.form['email'].strip()
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+    user = cur.fetchone()
+    conn.close()
 
-        conn = get_db_connection()
-        cur = conn.cursor(dictionary=True)
-        cur.execute("SELECT * FROM users WHERE email=%s", (email,))
-        user = cur.fetchone()
-        conn.close()
+    if not user:
+        flash("❌ Email not registered!", "danger")
+        return redirect('/forgot_password')
 
-        if not user:
-            flash("Email not registered.", "danger")
-            return redirect('/forgot')
+    token = s.dumps(email, salt='password-reset-salt')
+    link = url_for('reset_password', token=token, _external=True)
 
-        token = s.dumps(email, salt="reset-password")
-        reset_link = url_for('reset_password', token=token, _external=True)
+    msg = Message("Password Reset Request",
+                  sender="umamaheshadepu75@gmail.com",
+                  recipients=[email])
 
-        print("RESET LINK:", reset_link)  
+    msg.body = f"Click the link to reset your password:\n\n{link}\n\nThis link expires in 5 minutes."
 
-        flash("Password reset link sent! (Check console in dev mode)", "info")
-        return redirect('/login')
+    mail.send(msg)
 
-    return render_template("forgot.html")
+    flash("✅ Reset link sent to your email!", "success")
+    return redirect('/login')
 
 
-@app.route('/reset/<token>', methods=['GET', 'POST'])
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     try:
-        email = s.loads(token, salt="reset-password", max_age=600)
-    except:
-        flash("Reset link expired or invalid!", "danger")
-        return redirect('/forgot')
+        email = s.loads(token, salt='password-reset-salt', max_age=300)
+    except SignatureExpired:
+        return "❌ Link expired! Please request a new one."
 
     if request.method == 'POST':
-        password = request.form['password']
-        hashed_pw = generate_password_hash(password)
+        new_password = request.form['password']
+        hashed_pw = generate_password_hash(new_password)
 
         conn = get_db_connection()
         cur = conn.cursor()
@@ -162,11 +177,10 @@ def reset_password(token):
         conn.commit()
         conn.close()
 
-        flash("Password reset successfully!", "success")
+        flash("✅ Password reset successful! Please login.", "success")
         return redirect('/login')
 
-    return render_template("reset.html", token=token)
-
+    return render_template("reset_password.html", email=email)
 
 
 @app.route('/dashboard')
